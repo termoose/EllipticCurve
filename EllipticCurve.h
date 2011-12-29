@@ -11,6 +11,7 @@
 
 #include "BigIntegerLibrary.hh"
 
+/*
 namespace Elliptic
 {
     // Forward declaration
@@ -24,15 +25,37 @@ namespace Elliptic
     class Point
     {
     public:
-        Point( Curve< T >* Parent )
+        Point( Curve< T >* _Parent = nullptr ) : Zero( false ), x( 0 ), y( 0 ), Parent( _Parent )
         {
         }
         
         ~Point() { }
         
+        Point operator+( const Point< T >& Other )
+        {
+            Elliptic::Point< T > Result( Other.Parent );
+            
+            // Only add the points if they belong to the same curve
+            if( Parent != Other.Parent )
+            {
+                std::cerr << "Incompatible curve points!" << std::endl;
+                return Point< T >( nullptr );
+            }
+            
+            if( x != Other.x )
+            {
+                
+            }
+            
+            return Point< T >( nullptr );
+        }
+        
         // Curve points
         T x;
         T y;
+        
+        bool Zero;
+        Curve< T >* Parent;
     };
     
     ////
@@ -81,55 +104,58 @@ namespace Elliptic
         Point< T > P;
     };
     
-};
-
-/*
-class EllipticCurve;
-
-class CurvePoint
-{
-public:
-    CurvePoint( EllipticCurve *Parent = nullptr );
-    ~CurvePoint();
-    
-    void SetPoint( const BigInteger &_X, const BigInteger &_Y );
-    
-    CurvePoint operator+( const CurvePoint &Other );
-    
-    bool IsZero() { return Zero; }
-    
-    BigInteger X;
-    BigInteger Y;
-
-private:    
-    EllipticCurve *ParentCurve;
-    
-    bool Zero;
-};
-
-class EllipticCurve
-{
-public:
-    EllipticCurve( const BigInteger &_A, const BigInteger &_B, const BigUnsigned &_N );
-    EllipticCurve( const BigUnsigned &_N );
-    ~EllipticCurve();
-    
-    CurvePoint GetCurvePoint() { return P; }
-    
-    BigInteger GetA() const { return A; }
-    BigInteger GetB() const { return B; }
-    BigUnsigned GetN() const { return N; }
-    
-private:
-    // Coefficients of y^2 = x^3 + ax + b
-    BigInteger A;
-    BigInteger B;
-    
-    // The ring size Z/NZ
-    BigUnsigned N;
-    
-    // Initial point
-    CurvePoint P;
 };*/
+
+namespace Elliptic
+{
+    class Curve;
+
+    class Point
+    {
+    public:
+        Point( Curve *Parent = nullptr );
+        ~Point();
+        
+        void SetPoint( const BigInteger &_X, const BigInteger &_Y );
+        
+        Point operator+( const Point &Other );
+        
+        bool IsZero() { return Zero; }
+        
+        BigInteger X;
+        BigInteger Y;
+
+    private:    
+        Curve *Parent;
+        
+        bool Zero;
+    };
+
+    class Curve
+    {
+    public:
+        Curve( const BigInteger &_A, const BigInteger &_B, const BigUnsigned &_N );
+        Curve( const BigUnsigned &_N );
+        ~Curve();
+        
+        Point GetCurvePoint() { return P; }
+        
+        BigInteger GetA() const { return A; }
+        BigInteger GetB() const { return B; }
+        BigUnsigned GetN() const { return N; }
+        
+    private:
+        // Coefficients of y^2 = x^3 + ax + b
+        BigInteger A;
+        BigInteger B;
+        
+        // The ring size Z/NZ
+        BigUnsigned N;
+        
+        // Initial point
+        Point P;
+    };
+    
+}
 
 #endif

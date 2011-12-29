@@ -16,11 +16,21 @@ int main (int argc, const char * argv[])
     BigInteger a = 10;
     BigInteger b = 8;
     
-    Curve< BigInteger > Curve( 50 );
+    Curve EllipticCurve( 23 );
+    Point InitialPoint = EllipticCurve.GetCurvePoint();
     
-    Point< BigInteger > Point = Curve.GetPoint();
+    std::cout << "Point: (" << InitialPoint.X << ", " << InitialPoint.Y << ")" << std::endl;
     
-    std::cout << "Point (" << Point.x << ", " << Point.y << ")" << std::endl;
+    Point SumPoint = InitialPoint + InitialPoint;
+    
+    std::cout << "SumPoint: (" << SumPoint.X << ", " << SumPoint.Y << ")" << std::endl;
+    BigInteger X = SumPoint.X;
+    BigInteger Y = SumPoint.Y;
+    BigInteger A = EllipticCurve.GetA();
+    BigInteger B = EllipticCurve.GetB();
+    BigInteger N = EllipticCurve.GetN();
+    
+    std::cout << "Correct point: " << (((Y*Y) % N) == ((X*X*X + A*X + B) % N)) << std::endl;
 
     return 0;
 }

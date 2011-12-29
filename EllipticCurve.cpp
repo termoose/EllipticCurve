@@ -10,35 +10,36 @@
 #include "EllipticCurve.h"
 #include "BigIntegerAlgorithms.hh"
 
+using namespace Elliptic;
 
 ////
 // CurvePoint
 ////
-/*
-CurvePoint::CurvePoint( EllipticCurve *Parent ) : ParentCurve( Parent ), X( 0 ) , Y( 0 ), Zero( false )
+
+Point::Point( Curve* _Parent ) : Parent( _Parent ), X( 0 ) , Y( 0 ), Zero( false )
 {
 }
 
-CurvePoint::~CurvePoint()
+Point::~Point()
 {
 }
 
-void CurvePoint::SetPoint( const BigInteger &_X, const BigInteger &_Y )
+void Point::SetPoint( const BigInteger& _X, const BigInteger& _Y )
 {
     X = _X;
     Y = _Y;
 }
 
-CurvePoint CurvePoint::operator+( const CurvePoint &Other )
+Point Point::operator+( const Point& Other )
 {
-    CurvePoint Result( Other.ParentCurve );
-    BigUnsigned N = Other.ParentCurve->GetN();
+    Point Result( Other.Parent );
+    BigUnsigned N = Parent->GetN();
     
     // The points have to belong to the same curve
-    if( ParentCurve != Other.ParentCurve )
+    if( Parent != Other.Parent )
     {
         std::cout << "Incompatible curve points!" << std::endl;
-        return CurvePoint( nullptr );
+        return Point( nullptr );
     }
     
     if( X != Other.X ) // P != Q
@@ -52,8 +53,8 @@ CurvePoint CurvePoint::operator+( const CurvePoint &Other )
     }
     else if( !X.isZero() && !Other.X.isZero() ) // P == Q != O
     {
-        //std::cout << "Calculate modinv( " << BigInteger( 2 ) * Y << ", " << N << " )" << std::endl;
-        BigInteger S = ( BigInteger( 3 ) * X * X - ParentCurve->GetA() * modinv( BigInteger( 2 ) * Y, N ) ) % N;
+        // Catch this if the modinv method fails, which is when 2Y does not have an inverse mod N
+        BigInteger S = ( BigInteger( 3 ) * X * X - Parent->GetA() * modinv( (BigInteger( 2 ) * Y) % N, N ) ) % N;
         
         Result.X = ( S * S - BigInteger( 2 ) * X ) % N;
         Result.Y = ( S * ( X - Result.X ) - Y ) % N;
@@ -73,14 +74,14 @@ CurvePoint CurvePoint::operator+( const CurvePoint &Other )
 // Elliptic curve
 ////
 
-EllipticCurve::EllipticCurve( const BigInteger &_A, const BigInteger &_B, const BigUnsigned &_N ) :
+Curve::Curve( const BigInteger &_A, const BigInteger &_B, const BigUnsigned &_N ) :
 A( _A ), B( _B ), N( _N ), P( this )
 {
 }
 
 
 // Random curve
-EllipticCurve::EllipticCurve( const BigUnsigned &_N ) : P( this ), N( _N )
+Curve::Curve( const BigUnsigned &_N ) : P( this ), N( _N )
 {
     // Select random point
     srand( (unsigned int)time( NULL ) );
@@ -92,12 +93,14 @@ EllipticCurve::EllipticCurve( const BigUnsigned &_N ) : P( this ), N( _N )
 
     // Select random coefficients
     A = BigInteger( rand() ) % N;
-    B = Y * Y - X * X * X - A * X;
+    B = (Y * Y - X * X * X - A * X) % N;
     
-    std::cout << "Random curve y^2 = x^3 + " << A << "x - " << -B << std::endl;
+    std::cout << "Initial point: (" << X << ", " << Y << ")" << std::endl;
+    std::cout << "Correct point: " << (((Y*Y) % N) == ((X*X*X + A*X + B) % N)) << std::endl;
+    std::cout << "Random curve y^2 = x^3 + " << A << "x + " << B << std::endl;
 }
 
-EllipticCurve::~EllipticCurve()
+Curve::~Curve()
 {
     
-}*/
+}
