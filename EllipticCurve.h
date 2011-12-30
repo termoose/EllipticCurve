@@ -113,14 +113,17 @@ namespace Elliptic
     class Point
     {
     public:
-        Point( Curve *Parent = nullptr );
+        Point( BigInteger _X, BigInteger _Y, Curve *_Parent = nullptr );
+        Point( Curve *_Parent = nullptr );
         ~Point();
         
         void SetPoint( const BigInteger &_X, const BigInteger &_Y );
         
+        Point operator-( void );
         Point operator+( const Point &Other );
         
         bool IsZero() { return Zero; }
+        void SetZero() { Zero = true; }
         
         BigInteger X;
         BigInteger Y;

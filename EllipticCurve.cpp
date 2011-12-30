@@ -20,6 +20,10 @@ Point::Point( Curve* _Parent ) : Parent( _Parent ), X( 0 ) , Y( 0 ), Zero( false
 {
 }
 
+Point::Point( BigInteger _X, BigInteger _Y, Curve *_Parent ) : X( _X ), Y( _Y ), Parent( _Parent ), Zero( false )
+{    
+}
+
 Point::~Point()
 {
 }
@@ -30,10 +34,21 @@ void Point::SetPoint( const BigInteger& _X, const BigInteger& _Y )
     Y = _Y;
 }
 
+Point Point::operator-()
+{
+    return Point( X, -Y, Parent );
+}
+
+// Summing (x_1, y_1) + (x_2, y_2) = (x_3, y_3)
 Point Point::operator+( const Point& Other )
 {
-    Point Result( Other.Parent );
+    Point Result( Parent );
     BigUnsigned N = Parent->GetN();
+    
+    BigInteger Lambda = 0, v = 0;
+    
+    BigInteger x_1 = X, y_1 = Y;
+    BigInteger x_2 = Other.X, y_2 = Other.Y;
     
     // The points have to belong to the same curve
     if( Parent != Other.Parent )
@@ -42,30 +57,29 @@ Point Point::operator+( const Point& Other )
         return Point( nullptr );
     }
     
-    if( X != Other.X ) // P != Q
+    // The sum is the identity element O
+    if( x_1 == x_2 && y_1 == -y_2 )
     {
-        BigInteger S = ( (Y - Other.Y) * modinv( X - Other.X, N ) ) % N;
-        
-        Result.X = ( S * S - X - Other.X ) % N;
-        Result.Y = ( S * ( X - Result.X ) - Y ) % N;
-        
+        Result.SetZero();
         return Result;
     }
-    else if( !X.isZero() && !Other.X.isZero() ) // P == Q != O
+    
+    // Normal sum of two points
+    if( x_1 != x_2 )
     {
-        // Catch this if the modinv method fails, which is when 2Y does not have an inverse mod N
-        BigInteger S = ( BigInteger( 3 ) * X * X - Parent->GetA() * modinv( (BigInteger( 2 ) * Y) % N, N ) ) % N;
-        
-        Result.X = ( S * S - BigInteger( 2 ) * X ) % N;
-        Result.Y = ( S * ( X - Result.X ) - Y ) % N;
-        
-        return Result;
+        Lambda = ( y_2 - y_2 ) * modinv( (x_2 - x_1) % N, N );
+        v      = ( y_1*x_2 - y_2*x_1 ) * modinv( (x_2 - x_1) % N, N );
     }
-    else // P == Q == O
+    else
     {
-        // This is the identity element
-        Zero = true;
+        Lambda = (BigInteger(3) * x_1 * x_1 + Parent->GetA() ) * modinv( (BigInteger(2) * y_1) % N, N );
+        v      = ( Parent->GetA() * x_1 - x_1 * x_1 * x_1 + BigInteger(2)*Parent->GetB() ) * modinv( (BigInteger(2) * y_1) % N, N );
     }
+    
+    BigInteger ResultX = Lambda * Lambda - x_1 - x_2;
+    BigInteger ResultY = -Lambda * ResultX - v;
+    
+    Result.SetPoint( ResultX % N, ResultY % N );
     
     return Result;
 }
