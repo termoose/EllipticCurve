@@ -16,7 +16,7 @@ using namespace Elliptic;
 // CurvePoint
 ////
 
-Point::Point( Curve* _Parent ) : Parent( _Parent ), X( 0 ) , Y( 0 ), Zero( true )
+Point::Point( Curve* _Parent ) : Parent( _Parent ), X( 0 ) , Y( 0 ), Zero( false )
 {
 }
 
@@ -74,13 +74,17 @@ Point Point::operator+( const Point& Other )
     // Normal sum of two points
     if( x_1 != x_2 )
     {
-        Lambda = ( y_2 - y_2 ) * modinv( (x_2 - x_1) % N, N );
-        v      = ( y_1*x_2 - y_2*x_1 ) * modinv( (x_2 - x_1) % N, N );
+        BigInteger Divider = modinv( (x_2 - x_1) % N, N );
+
+        Lambda = ( y_2 - y_1 ) * Divider;
+        v      = ( y_1*x_2 - y_2*x_1 ) * Divider;
     }
     else
     {
-        Lambda = ( BigInteger(3) * x_1 * x_1 + A ) * modinv( (BigInteger(2) * y_1) % N, N );
-        v      = ( A * x_1 - x_1 * x_1 * x_1 + BigInteger(2) * B ) * modinv( (BigInteger(2) * y_1) % N, N );
+        BigInteger Divider = modinv( (BigInteger(2) * y_1) % N, N );
+
+        Lambda = ( BigInteger(3) * x_1 * x_1 + A ) * Divider;
+        v      = ( A * x_1 - x_1 * x_1 * x_1 + BigInteger(2) * B ) * Divider;
     }
     
     BigInteger ResultX = Lambda * Lambda - x_1 - x_2;

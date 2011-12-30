@@ -34,9 +34,10 @@ namespace Elliptic
         BigInteger Y;
         
         bool Zero;
+        Curve *Parent;
 
     private:    
-        Curve *Parent;
+
 
     };
 

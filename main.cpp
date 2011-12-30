@@ -11,30 +11,53 @@
 
 using namespace Elliptic;
 
+Point ntimes( Point P, BigInteger n );
+
+Point ntimes( Point P, BigInteger n )
+{
+    if( n == 0 ) return P;
+    
+    else if( n % 2 == 1 )
+    {
+        return P + ntimes( P, n - 1 );
+    }
+    else
+    {
+        return ntimes( P + P, n / 2 );
+    }
+}
+
 int main (int argc, const char * argv[])
 {
-    BigInteger a = 10;
-    BigInteger b = 8;
-    
     Curve EllipticCurve( 23 );
     Point InitialPoint = EllipticCurve.GetCurvePoint();
-    
+
     std::cout << "Point: (" << InitialPoint.X << ", " << InitialPoint.Y << ")" << std::endl;
 
-    //for( int i = 0; i < 50000; ++i )
+    Point SumPoint( InitialPoint.Parent );
+    
+    for( int i = 0; i < 10; ++i )
     {
-        //InitialPoint = InitialPoint + InitialPoint;
+
+        SumPoint = SumPoint + InitialPoint;
+        std::cout << "(" << SumPoint.X << ", " << SumPoint.Y << ")" << " ";
+        BigInteger X = SumPoint.X;
+        BigInteger A = EllipticCurve.GetA();
+        BigInteger B = EllipticCurve.GetB();
+        BigInteger Y = SumPoint.Y;
+        BigInteger N = EllipticCurve.GetN();
+        std::cout << "Correct point: " << (((Y*Y) % N) == ((X*X*X + A*X + B) % N)) << std::endl;
     }
     
     //InitialPoint = InitialPoint * 500000;
     
-    Point SumPoint = InitialPoint * 2;
+    //Point SumPoint = InitialPoint;
     
     std::cout << "SumPoint: (" << SumPoint.X << ", " << SumPoint.Y << ")" << std::endl;
     BigInteger X = SumPoint.X;
-    BigInteger Y = SumPoint.Y;
     BigInteger A = EllipticCurve.GetA();
     BigInteger B = EllipticCurve.GetB();
+    BigInteger Y = SumPoint.Y;
     BigInteger N = EllipticCurve.GetN();
     
     if( !SumPoint.Zero )
