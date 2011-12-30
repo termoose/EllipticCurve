@@ -16,7 +16,7 @@ using namespace Elliptic;
 // CurvePoint
 ////
 
-Point::Point( Curve* _Parent ) : Parent( _Parent ), X( 0 ) , Y( 0 ), Zero( false )
+Point::Point( Curve* _Parent ) : Parent( _Parent ), X( 0 ) , Y( 0 ), Zero( true )
 {
 }
 
@@ -89,6 +89,20 @@ Point Point::operator+( const Point& Other )
     Result.SetPoint( ResultX % N, ResultY % N );
     
     return Result;
+}
+
+Point Point::operator*( const BigInteger &n )
+{
+    if( n == 0 ) return Point( Parent );
+    
+    else if( n % 2 == 1 )
+    {
+        return *this + *this * (n - 1);
+    }
+    else
+    {
+        return (*this + *this) * (n / 2);
+    }
 }
 
 ////

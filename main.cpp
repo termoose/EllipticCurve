@@ -21,12 +21,14 @@ int main (int argc, const char * argv[])
     
     std::cout << "Point: (" << InitialPoint.X << ", " << InitialPoint.Y << ")" << std::endl;
 
-    for( int i = 0; i < 50000; ++i )
+    //for( int i = 0; i < 50000; ++i )
     {
-        InitialPoint = InitialPoint + InitialPoint;
+        //InitialPoint = InitialPoint + InitialPoint;
     }
     
-    Point SumPoint = InitialPoint + InitialPoint;
+    //InitialPoint = InitialPoint * 500000;
+    
+    Point SumPoint = InitialPoint * 2;
     
     std::cout << "SumPoint: (" << SumPoint.X << ", " << SumPoint.Y << ")" << std::endl;
     BigInteger X = SumPoint.X;

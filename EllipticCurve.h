@@ -27,7 +27,8 @@ namespace Elliptic
         BigInteger GetOrder() const;
         
         Point operator-( void );
-        Point operator+( const Point &Other );
+        Point operator+( const Point& Other );
+        Point operator*( const BigInteger& n );
         
         BigInteger X;
         BigInteger Y;
