@@ -44,6 +44,7 @@ Point Point::operator+( const Point& Other )
 {
     Point Result( Parent );
     BigUnsigned N = Parent->GetN();
+    BigInteger A = Parent->GetA(), B = Parent->GetB();
     
     BigInteger Lambda = 0, v = 0;
     
@@ -57,10 +58,16 @@ Point Point::operator+( const Point& Other )
         return Point( nullptr );
     }
     
+    // O + P = P + O = P
+    if( Zero )
+        return Other;
+    if( Other.Zero )
+        return *this;
+    
     // The sum is the identity element O
     if( x_1 == x_2 && y_1 == -y_2 )
     {
-        Result.SetZero();
+        Result.Zero = true;
         return Result;
     }
     
@@ -72,8 +79,8 @@ Point Point::operator+( const Point& Other )
     }
     else
     {
-        Lambda = (BigInteger(3) * x_1 * x_1 + Parent->GetA() ) * modinv( (BigInteger(2) * y_1) % N, N );
-        v      = ( Parent->GetA() * x_1 - x_1 * x_1 * x_1 + BigInteger(2)*Parent->GetB() ) * modinv( (BigInteger(2) * y_1) % N, N );
+        Lambda = ( BigInteger(3) * x_1 * x_1 + A ) * modinv( (BigInteger(2) * y_1) % N, N );
+        v      = ( A * x_1 - x_1 * x_1 * x_1 + BigInteger(2) * B ) * modinv( (BigInteger(2) * y_1) % N, N );
     }
     
     BigInteger ResultX = Lambda * Lambda - x_1 - x_2;

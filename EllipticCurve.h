@@ -11,101 +11,6 @@
 
 #include "BigIntegerLibrary.hh"
 
-/*
-namespace Elliptic
-{
-    // Forward declaration
-    template< typename T >
-    class Curve;
-    
-    ////
-    // Class for the curve points
-    ////
-    template< typename T >
-    class Point
-    {
-    public:
-        Point( Curve< T >* _Parent = nullptr ) : Zero( false ), x( 0 ), y( 0 ), Parent( _Parent )
-        {
-        }
-        
-        ~Point() { }
-        
-        Point operator+( const Point< T >& Other )
-        {
-            Elliptic::Point< T > Result( Other.Parent );
-            
-            // Only add the points if they belong to the same curve
-            if( Parent != Other.Parent )
-            {
-                std::cerr << "Incompatible curve points!" << std::endl;
-                return Point< T >( nullptr );
-            }
-            
-            if( x != Other.x )
-            {
-                
-            }
-            
-            return Point< T >( nullptr );
-        }
-        
-        // Curve points
-        T x;
-        T y;
-        
-        bool Zero;
-        Curve< T >* Parent;
-    };
-    
-    ////
-    // Class for the elliptic curve
-    ////
-    template< typename T >
-    class Curve
-    {
-    public:
-        Curve( const T& _N ) : N( _N ), P( this )
-        {
-            srand( (unsigned int)time(nullptr) );
-            
-            // T needs to have a constructor that takes type "int" as argument
-            T X = T( rand() ) % N;
-            T Y = T( rand() ) % N;
-            
-            P.x = X;
-            P.y = Y;
-            
-            // Select random coefficients
-            A = T( rand() ) % N;
-            B = (Y * Y - X * X * X - A * X) % N;
-            
-            std::cout << "Initial point: (" << X << ", " << Y << ")" << std::endl;
-            std::cout << "Correct point: " << (((Y*Y) % N) == ((X*X*X + A*X + B) % N)) << std::endl;
-            std::cout << "Random curve y^2 = x^3 + " << A << "x + " << B << std::endl;
-        }
-        
-        ~Curve() { }
-        
-        T GetA() { return A; }
-        T GetB() { return B; }
-        T GetN() { return N; }
-        
-        Point< T > GetPoint() { return P; }
-        
-    private:
-        // The ring size Z/NZ
-        T N;
-        
-        // Coefficients of y^2 = x^3 + Ax + B
-        T A;
-        T B;
-        
-        Point< T > P;
-    };
-    
-};*/
-
 namespace Elliptic
 {
     class Curve;
@@ -119,19 +24,19 @@ namespace Elliptic
         
         void SetPoint( const BigInteger &_X, const BigInteger &_Y );
         
+        BigInteger GetOrder() const;
+        
         Point operator-( void );
         Point operator+( const Point &Other );
         
-        bool IsZero() { return Zero; }
-        void SetZero() { Zero = true; }
-        
         BigInteger X;
         BigInteger Y;
+        
+        bool Zero;
 
     private:    
         Curve *Parent;
-        
-        bool Zero;
+
     };
 
     class Curve

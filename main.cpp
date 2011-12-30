@@ -20,6 +20,11 @@ int main (int argc, const char * argv[])
     Point InitialPoint = EllipticCurve.GetCurvePoint();
     
     std::cout << "Point: (" << InitialPoint.X << ", " << InitialPoint.Y << ")" << std::endl;
+
+    for( int i = 0; i < 50000; ++i )
+    {
+        InitialPoint = InitialPoint + InitialPoint;
+    }
     
     Point SumPoint = InitialPoint + InitialPoint;
     
@@ -30,7 +35,10 @@ int main (int argc, const char * argv[])
     BigInteger B = EllipticCurve.GetB();
     BigInteger N = EllipticCurve.GetN();
     
-    std::cout << "Correct point: " << (((Y*Y) % N) == ((X*X*X + A*X + B) % N)) << std::endl;
+    if( !SumPoint.Zero )
+        std::cout << "Correct point: " << (((Y*Y) % N) == ((X*X*X + A*X + B) % N)) << std::endl;
+    else
+        std::cout << "Identity point!" << std::endl;
 
     return 0;
 }
