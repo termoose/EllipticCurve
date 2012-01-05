@@ -4,3 +4,4 @@ testsuite
 testsuite.expected
 testsuite.out
 testsuite.err
+*DS_Store
