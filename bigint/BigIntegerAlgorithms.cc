@@ -1,5 +1,7 @@
 #include "BigIntegerAlgorithms.hh"
 
+#include <iostream>
+
 BigUnsigned gcd(BigUnsigned a, BigUnsigned b) {
 	BigUnsigned trash;
 	// Neat in-place alternating technique.
@@ -40,8 +42,8 @@ void extendedEuclidean(BigInteger m, BigInteger n,
 	}
 }
 
-BigUnsigned modinv(const BigInteger &x, const BigUnsigned &n) {
-	BigInteger g, r, s;
+BigUnsigned modinv(const BigInteger &x, const BigUnsigned &n, BigInteger &g) {
+	BigInteger r, s;
 	extendedEuclidean(x, n, g, r, s);
 	if (g == 1)
 		// r*x + s*n == 1, so r*x === 1 (mod n), so r is the answer.

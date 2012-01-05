@@ -16,7 +16,7 @@ void extendedEuclidean(BigInteger m, BigInteger n,
 
 /* Returns the multiplicative inverse of x modulo n, or throws an exception if
  * they have a common factor. */
-BigUnsigned modinv(const BigInteger &x, const BigUnsigned &n);
+BigUnsigned modinv(const BigInteger &x, const BigUnsigned &n, BigInteger &g );
 
 // Returns (base ^ exponent) % modulus.
 BigUnsigned modexp(const BigInteger &base, const BigUnsigned &exponent,

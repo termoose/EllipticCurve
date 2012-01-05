@@ -19,7 +19,7 @@ namespace Elliptic
     {
     public:
         Point( BigInteger _X, BigInteger _Y, Curve *_Parent = nullptr );
-        Point( Curve *_Parent = nullptr );
+        Point( Curve *_Parent = nullptr, bool _Zero = false );
         ~Point();
         
         void SetPoint( const BigInteger &_X, const BigInteger &_Y );
@@ -29,6 +29,8 @@ namespace Elliptic
         Point operator-( void );
         Point operator+( const Point& Other );
         Point operator*( const BigInteger& n );
+        
+        void Print();
         
         BigInteger X;
         BigInteger Y;
@@ -53,6 +55,8 @@ namespace Elliptic
         BigInteger GetA() const { return A; }
         BigInteger GetB() const { return B; }
         BigUnsigned GetN() const { return N; }
+        
+        bool TestPoint( const Point& P );
         
     private:
         // Coefficients of y^2 = x^3 + ax + b

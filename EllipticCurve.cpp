@@ -16,7 +16,7 @@ using namespace Elliptic;
 // CurvePoint
 ////
 
-Point::Point( Curve* _Parent ) : Parent( _Parent ), X( 0 ) , Y( 0 ), Zero( false )
+Point::Point( Curve* _Parent, bool _Zero ) : Parent( _Parent ), X( 0 ) , Y( 0 ), Zero( _Zero )
 {
 }
 
@@ -36,7 +36,7 @@ void Point::SetPoint( const BigInteger& _X, const BigInteger& _Y )
 
 Point Point::operator-()
 {
-    return Point( X, -Y, Parent );
+    return Point( X, (-Y) % Parent->GetN(), Parent );
 }
 
 // Summing (x_1, y_1) + (x_2, y_2) = (x_3, y_3)
@@ -57,31 +57,48 @@ Point Point::operator+( const Point& Other )
         std::cout << "Incompatible curve points!" << std::endl;
         return Point( nullptr );
     }
-    
+
     // O + P = P + O = P
     if( Zero )
         return Other;
     if( Other.Zero )
         return *this;
     
-    // The sum is the identity element O
-    if( x_1 == x_2 && y_1 == -y_2 )
+    // The sum is the identity element O (Infinity)
+    if( x_1 == x_2 && y_1 == (-y_2) % N )
     {
-        Result.Zero = true;
-        return Result;
+        return Point( Parent, true );
     }
-    
+
     // Normal sum of two points
     if( x_1 != x_2 )
     {
-        BigInteger Divider = modinv( (x_2 - x_1) % N, N );
+        BigInteger Divider, factor;
+
+        try
+        {
+            Divider = modinv( (x_2 - x_1) % N, N, factor );
+        }
+        catch( const char *Message )
+        {
+            std::cout << factor << " is a factor of " << N << ", first!" << std::endl;
+        }
 
         Lambda = ( y_2 - y_1 ) * Divider;
         v      = ( y_1*x_2 - y_2*x_1 ) * Divider;
     }
     else
     {
-        BigInteger Divider = modinv( (BigInteger(2) * y_1) % N, N );
+        BigInteger Divider, factor;
+        
+        try 
+        {
+            Divider = modinv( (BigInteger(2) * y_1) % N, N, factor );
+        }
+        catch ( const char *Message )
+        {
+            std::cout << factor << " is a factor of " << N << ", second!" << std::endl;
+        }
 
         Lambda = ( BigInteger(3) * x_1 * x_1 + A ) * Divider;
         v      = ( A * x_1 - x_1 * x_1 * x_1 + BigInteger(2) * B ) * Divider;
@@ -97,7 +114,7 @@ Point Point::operator+( const Point& Other )
 
 Point Point::operator*( const BigInteger &n )
 {
-    if( n == 0 ) return Point( Parent );
+    if( n == 0 ) return Point( Parent, true );
     
     else if( n % 2 == 1 )
     {
@@ -109,20 +126,26 @@ Point Point::operator*( const BigInteger &n )
     }
 }
 
+void Point::Print()
+{
+    std::cout << "(" << X << ", " << Y << ") " << "On curve: " << Parent->TestPoint( *this ) << std::endl;
+}
+
 ////
 // Elliptic curve
 ////
 
 Curve::Curve( const BigInteger &_A, const BigInteger &_B, const BigUnsigned &_N ) :
-A( _A ), B( _B ), N( _N ), P( this )
+A( _A ), B( _B ), N( _N ), P( this, false )
 {
 }
 
 
 // Random curve
-Curve::Curve( const BigUnsigned &_N ) : P( this ), N( _N )
+Curve::Curve( const BigUnsigned &_N ) : P( this, false ), N( _N )
 {
-    // Select random point
+    // Select random point, FIXME: use thread id as random seed, should mean
+    // less collisions
     srand( (unsigned int)time( NULL ) );
     BigInteger X = BigInteger( rand() ) % N;
     BigInteger Y = BigInteger( rand() ) % N;
@@ -133,10 +156,15 @@ Curve::Curve( const BigUnsigned &_N ) : P( this ), N( _N )
     // Select random coefficients
     A = BigInteger( rand() ) % N;
     B = (Y * Y - X * X * X - A * X) % N;
-    
-    std::cout << "Initial point: (" << X << ", " << Y << ")" << std::endl;
-    std::cout << "Correct point: " << (((Y*Y) % N) == ((X*X*X + A*X + B) % N)) << std::endl;
-    std::cout << "Random curve y^2 = x^3 + " << A << "x + " << B << std::endl;
+
+}
+
+bool Curve::TestPoint( const Elliptic::Point &P )
+{
+    if( P.Zero )
+        return true;
+
+    return (((P.Y*P.Y) % N) == ((P.X*P.X*P.X + A*P.X + B) % N));
 }
 
 Curve::~Curve()
