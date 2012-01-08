@@ -46,10 +46,7 @@ Point Point::operator+( const Point& Other )
     BigUnsigned N = Parent->GetN();
     BigInteger A = Parent->GetA(), B = Parent->GetB();
     
-    BigInteger Lambda = 0, v = 0;
-    
-    BigInteger x_1 = X, y_1 = Y;
-    BigInteger x_2 = Other.X, y_2 = Other.Y;
+    BigInteger Lambda, v;
     
     // The points have to belong to the same curve
     if( Parent != Other.Parent )
@@ -65,27 +62,27 @@ Point Point::operator+( const Point& Other )
         return *this;
     
     // The sum is the identity element O (Infinity)
-    if( x_1 == x_2 && y_1 == (-y_2) % N )
+    if( X == Other.X && (Y + Other.Y).isZero() )
     {
         return Point( Parent, true );
     }
 
     // Normal sum of two points
-    if( x_1 != x_2 )
+    if( X != Other.X )
     {
         BigInteger Divider, factor;
 
         try
         {
-            Divider = modinv( (x_2 - x_1) % N, N, factor );
+            Divider = modinv( (Other.X - X), N, factor );
         }
         catch( const char *Message )
         {
-            std::cout << factor << " is a factor of " << N << ", first!" << std::endl;
+            throw factor;
         }
 
-        Lambda = ( y_2 - y_1 ) * Divider;
-        v      = ( y_1*x_2 - y_2*x_1 ) * Divider;
+        Lambda = ( Other.Y - Y ) * Divider;
+        v      = ( X*Other.X - Other.Y*X ) * Divider;
     }
     else
     {
@@ -93,28 +90,27 @@ Point Point::operator+( const Point& Other )
         
         try 
         {
-            Divider = modinv( (BigInteger(2) * y_1) % N, N, factor );
+            Divider = modinv( (BigInteger(2) * Y), N, factor );
         }
         catch ( const char *Message )
         {
-            std::cout << factor << " is a factor of " << N << ", second!" << std::endl;
+            throw factor;
         }
 
-        Lambda = ( BigInteger(3) * x_1 * x_1 + A ) * Divider;
-        v      = ( A * x_1 - x_1 * x_1 * x_1 + BigInteger(2) * B ) * Divider;
+        Lambda = ( BigInteger(3) * X * X + A ) * Divider;
+        v      = ( A * X - X * X * X + BigInteger(2) * B ) * Divider;
     }
     
-    BigInteger ResultX = Lambda * Lambda - x_1 - x_2;
-    BigInteger ResultY = -Lambda * ResultX - v;
+    BigInteger ResultX = Lambda * Lambda - X - Other.X;
     
-    Result.SetPoint( ResultX % N, ResultY % N );
+    Result.SetPoint( ResultX % N, (-Lambda * ResultX - v) % N );
     
     return Result;
 }
 
 Point Point::operator*( const BigInteger &n )
 {
-    if( n == 0 ) return Point( Parent, true );
+    if( n == 0 || Zero ) return Point( Parent, true );
     
     else if( n % 2 == 1 )
     {
@@ -147,16 +143,15 @@ Curve::Curve( const BigUnsigned &_N ) : P( this, false ), N( _N )
     // Select random point, FIXME: use thread id as random seed, should mean
     // less collisions
     srand( (unsigned int)time( NULL ) );
-    BigInteger X = BigInteger( rand() ) % N;
-    BigInteger Y = BigInteger( rand() ) % N;
-    
-    P.X = X;
-    P.Y = Y;
+    P.X = BigInteger( rand() ) % N;
+    P.Y = BigInteger( rand() ) % N;
+
 
     // Select random coefficients
     A = BigInteger( rand() ) % N;
-    B = (Y * Y - X * X * X - A * X) % N;
-
+    B = (P.Y * P.Y - P.X  * P.X  * P.X  - A * P.X) % N;
+    
+    //std::cout << "A: " << A << " B: " << B << std::endl;
 }
 
 bool Curve::TestPoint( const Elliptic::Point &P )
